@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% load static %}
+{% bootstrap_css %}
+{% bootstrap_javascript jquery='full' %}
+{% load widget_tweaks %}
+
+{% block header %}
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+{% endblock %}
+
+{% block title %}
+{% endblock %}
+
+{% block content %}
+    {% with ''|center:5 as row_num %}
+        {% for _ in row_num %}
+            <div class="row">
+                {% with ''|center:4 as card_list %}
+                    {% for _ in card_list %}
+                        <div class="col-sm-3">
+                            <div class="card mb-3">
+                                <div class="row no-gutters">
+                                    <div class="col-md-7">
+                                    <svg class="bd-placeholder-img" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" focusable="false" role="img" aria-label="Placeholder: Image"><title>Placeholder</title><rect width="100%" height="100%" fill="#868e96"/><text x="50%" y="50%" fill="#dee2e6" dy=".3em">Image</text></svg>
+                                    </div>
+                                    <div class="col-md-5">
+                                        <div class="card-body">
+                                            <h5 class="card-title">名前</h5>
+                                            <p class="card-text">部署</p>
+                                            <p class="card-text">役職</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% endwith %}
+            </div>
+        {% endfor %}
+    {% endwith %}
+    <div class="row">
+        <div class="col-sm-2 offset-sm-3">
+            <button class="btn btn-primary">手札を選び直す</button>
+        </div>
+        <div class="col-sm-2 offset-sm-2">
+            <button class="btn btn-primary">手札を確定する</button>
+        </div>
+    </div>
+{% endblock %}
