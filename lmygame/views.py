@@ -1,13 +1,25 @@
 from django.shortcuts import render
-from django.contrib.auth.views import LoginView as AuthLoginView
 
-class LoginView(AuthLoginView):
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.views import (LoginView, LogoutView)
+from .forms import LoginForm
+
+class Login(LoginView):
     """
     ログイン画面に対応するview
     """
+    form_class = LoginForm
     template_name = 'lmygame/login.html'
 
-login = LoginView.as_view()
+login = Login.as_view()
+
+class Logout(LoginRequiredMixin, LogoutView):
+    """
+    ログアウト機能に対応するview
+    """
+    template_name = 'lmygame/login.html'
+
+logout = Logout.as_view()
 
 def index(request):
     """
