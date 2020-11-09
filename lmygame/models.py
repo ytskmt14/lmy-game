@@ -36,5 +36,26 @@ class Employee(AbstractUser):
         default=False,
     )
 
+class Question(models.Model):
+    question_id = models.AutoField(primary_key=True)
+    content = models.TextField(
+        _('問題文'),
+    )
+    is_selected = models.BooleanField(
+        _('選択済'),
+        default=False,
+    )
 
+    def __str__(self):
+        return self.content
 
+class Choice(models.Model):
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    choice_text = models.CharField(
+        _('選択肢'),
+        max_length=50,
+    )
+    is_correct = models.BooleanField(
+        _('正解'),
+        default=False
+    )

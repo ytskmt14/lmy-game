@@ -12,4 +12,28 @@
 {% endblock %}
 
 {% block content %}
+    <div class="row mt-5 h-25">
+        <div class="col-sm-3 offset-sm-2">
+            <a href="#" class="btn btn-outline-primary w-100 h-100 d-flex align-items-center justify-content-center" role="button" aria-pressed="true">
+                回答者選出
+            </a>
+        </div>
+        <div class="col-sm-3 offset-sm-2">
+            <a href="{% url 'lmygame:name_plate_list' %}" class="btn btn-outline-primary w-100 h-100 d-flex align-items-center justify-content-center" role="button" aria-pressed="true">
+                手札一覧
+            </a>
+        </div>
+    </div>
+    <div class="row mt-5 h-25">
+        <div class="col-sm-3 offset-sm-2">
+            <a href="{% url 'lmygame:question' %}" class="btn btn-outline-primary w-100 h-100 d-flex align-items-center justify-content-center" role="button" aria-pressed="true">
+                問題&選択肢
+            </a>
+        </div>
+        <div class="col-sm-3 offset-sm-2">
+            <a href="#" class="btn btn-outline-primary w-100 h-100 d-flex align-items-center justify-content-center" role="button" aria-pressed="true">
+                最終結果
+            </a>
+        </div>
+    </div>
 {% endblock %}

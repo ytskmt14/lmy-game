@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% load static %}
+{% bootstrap_css %}
+{% bootstrap_javascript jquery='full' %}
+{% load widget_tweaks %}
+
+{% block header %}
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+{% endblock %}
+
+{% block title %}
+{% endblock %}
+
+{% block content %}
+    <div class="login-box">
+        <div class="login-logo">
+            <b>2020PS納会イベント</b>
+        </div>
+        <!-- /.login-logo -->
+        <div class="login-box-body">
+            <form action="" method="POST">
+                {% csrf_token %}
+                {% for field in form %}
+                    <div class="form-group has-feedback">
+                        {{ field }}
+                    </div>
+                {% endfor %}
+                <div class="row">
+
+                    {% for error in form.non_field_errors %}
+                        <div class="alert alert-danger" role="alert">
+                            <p>{{ error }}</p>
+                        </div>
+                    {% endfor %}
+                    <!-- /.col -->
+                    <div class="col-xs-4">
+                        <button type="submit" class="btn btn-primary btn-block btn-flat">
+                            ログイン
+                        </button>
+                    </div>
+                    <!-- /.col -->
+                </div>
+            </form>
+        </div>
+        <!-- /.login-box-body -->
+    </div>
+    <!-- /.login-box -->
+{% endblock %}
