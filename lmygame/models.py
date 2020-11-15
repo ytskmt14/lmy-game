@@ -59,3 +59,20 @@ class Choice(models.Model):
         _('正解'),
         default=False
     )
+
+    def __str__(self):
+        return self.choice_text
+
+class Answer(models.Model):
+    respondent = models.CharField(
+        _('回答者'),
+        max_length=6,
+        )
+    answer = models.CharField(
+        _('回答'),
+        max_length=1,
+    )
+    question = models.ForeignKey(
+        Question,
+        on_delete=models.CASCADE
+    )
