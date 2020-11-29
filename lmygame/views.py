@@ -1,11 +1,14 @@
-from django.shortcuts import render
+import random
 
-from django.contrib.auth import logout
+from django.contrib.auth import logout, login as auth_login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import (LoginView, LogoutView)
-from .forms import LoginForm, ChoiceForm
-from .models import Question, Choice, Employee, Answer
+from django.http import HttpResponseRedirect
+from django.shortcuts import render
+
+from .forms import LoginForm
+from .models import Question, Employee
 
 class Login(LoginView):
     """
@@ -13,6 +16,14 @@ class Login(LoginView):
     """
     form_class = LoginForm
     template_name = 'lmygame/login.html'
+    def form_valid(self, form):
+        username = form.cleaned_data.get('username')
+        user = Employee.objects.get(username=username)
+        user.is_participant = True
+        user.save()
+        """Security check complete. Log the user in."""
+        auth_login(self.request, form.get_user())
+        return HttpResponseRedirect(self.get_success_url())
 
 login = Login.as_view()
 
@@ -38,7 +49,60 @@ def selection(request):
     """
     回答者選出画面に対応するview
     """
-    return render(request, "lmygame/selection.html")
+    is_admin = request.user.is_admin
+
+    if request.method == 'GET':
+        respondences = Employee.objects.filter(is_respondent=True).values('username')
+        respondences_info = [Employee.objects.get(username=respondence['username']) for respondence in respondences]
+        context = {
+            'is_admin': is_admin,
+            'respondences_info': respondences_info,
+        }
+    elif request.method == 'POST':
+        if 'selection' in request.POST:
+            #############################
+            # 回答者を選ぶボタン押下時の処理 #
+            #############################
+            # 参加者、かつ回答済でない人をリスト化
+            participants = Employee.objects.filter(is_participant=True).filter(was_respondent=False).values('username')
+            # リストからランダムに3名選出
+            participants = [participant['username'] for participant in participants]
+            respondence_list = []
+            if len(participants) >= 3:
+                respondence_list = random.sample(participants, 2)
+                # respondence_list = random.sample(participants, 3)
+            else:
+                respondence_list = random.sample(participants, len(participants))
+            # 回答者フラグの立っている社員のフラグをおろす
+            past_respondences = Employee.objects.filter(is_respondent=True)
+            for past_respondence in past_respondences:
+                past_respondence.is_respondent = False
+                past_respondence.was_respondent = True
+                past_respondence.save()
+
+            # 選出された社員の回答者フラグを立てる
+            for username in respondence_list:
+                respondent = Employee.objects.get(username=username)
+                respondent.is_respondent = True
+                respondent.save()
+
+            respondences_info = [Employee.objects.get(username=username) for username in respondence_list]
+            context = {
+                'is_admin': is_admin,
+                'respondences_info': respondences_info,
+            }
+        elif 'grantPoint' in request.POST:
+            #############################
+            # ポイント付与ボタン押下時の処理 #
+            #############################
+            #【参加者への付与タイミング】　
+            #・ 手札の社員が回答者に選ばれる → +1pt
+            #・ 手札の社員が正解する → +2pt
+            #【回答者への付与タイミング】
+            #・  問題に正解する → +3pt
+
+            pass
+    return render(request, "lmygame/selection.html", context)
 
 @login_required
 def name_plate_list(request):
@@ -56,40 +120,26 @@ def question(request):
     question = Question.objects.filter(is_selected=False).order_by('question_id').first()
     # ユーザのステータス取得
     is_admin = request.user.is_admin
-    is_respondent = request.user.is_respondent
     # 答え表示フラグ
     is_disp_answer = False
 
     if request.method == 'GET':
-        choices, form = _get_choices(question)
         context = {
             'question': question,
-            'choices': choices,
-            'form': form,
             'is_admin': is_admin,
-            'is_respondent': is_respondent,
             'is_disp_answer': is_disp_answer,
         }
     elif request.method == 'POST':
-        if 'selection' in request.POST:
-            # 回答者選出ボタン押下時
-            print('selection')
-            return render(request, "lmygame/selection.html")
-        elif 'answer' in request.POST:
+        if 'answer' in request.POST:
             # 答えを表示ボタン押下時
-            # 正解を取得
-            answer = _get_correct_choice(question).get().choice_text
             # 答え表示フラグをONにする
             is_disp_answer = True
             # 画面を表示する
             context = {
                 'question': question,
-                'answer': answer,
                 'is_admin': is_admin,
-                'is_respondent': is_respondent,
                 'is_disp_answer': is_disp_answer,
             }
-            print('answer')
         elif 'next' in request.POST:
             # 次の問題へボタン押下時
             # 現在の問題に選択済フラグを立てる
@@ -97,37 +147,11 @@ def question(request):
             question.save()
             # 次の問題を取得する
             next_question = Question.objects.filter(is_selected=False).order_by('question_id').first()
-            # 問題に対応する選択肢を取得する
-            choices, form = _get_choices(next_question)
             # 画面を表示する
             context = {
                 'question': next_question,
-                'choices': choices,
-                'form': form,
                 'is_admin': True,
-                'is_respondent': False,
                 'is_disp_answer': False,
-            }
-        elif 'respond' in request.POST:
-            # 回答するボタン押下時
-            # Answerモデルにデータ登録
-            respondent_id = request.user.username
-            answer = request.POST['choice']
-            Answer.objects.create(respondent=respondent_id, answer=answer, question=question)
-            # 回答者の回答者フラグ(is_respondent)と回答済フラグ(was_respondent)を更新
-            respondent = Employee.objects.filter(username=respondent_id).get()
-            respondent.is_respondent = False
-            respondent.was_respondent = True
-            respondent.save()
-            # 画面表示用のデータ取得
-            choices, form = _get_choices(question)
-            context = {
-                'question': question,
-                'choices': choices,
-                'form': form,
-                'is_admin': respondent.is_admin,
-                'is_respondent': respondent.is_respondent,
-                'is_disp_answer': is_disp_answer,
             }
 
     return render(request, "lmygame/question.html", context)
@@ -138,20 +162,3 @@ def result(request):
     最終結果表示画面に対応するview
     """
     return render(request, "lmygame/result.html")
-
-
-def _get_choices(question):
-    """
-    問題に紐づく選択肢を取得する関数（private）
-    """
-    choices = Choice.objects.filter(question__question_id=question.question_id)
-    form = ChoiceForm()
-    form.fields['choice'].queryset = Choice.objects.filter(question__question_id=question.question_id)
-    return choices, form
-
-def _get_correct_choice(question):
-    """
-    問題の正解の選択肢のみを取得する関数(private)
-    """
-    choice = Choice.objects.filter(question__question_id=question.question_id).filter(is_correct=1)
-    return choice

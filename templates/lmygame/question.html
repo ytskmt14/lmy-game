@@ -16,8 +16,8 @@
         <form action="" method=post>
             {% csrf_token %}
             {% if is_admin %}
+                <a class="btn btn-primary" href="{% url 'lmygame:selection' %}">回答者選出</a>
                 {% if not is_disp_answer %}
-                    <input class="btn btn-primary" type="submit" name="selection" value="回答者選出">
                     <input class="btn btn-primary" type="submit" name="answer" value="答えを表示">
                 {% else %}
                     <input class="btn btn-primary" type="submit" name="next" value="次の問題へ">
@@ -25,36 +25,17 @@
             {% endif %}
         </form>
     </div>
-    <div class="row mt-4 h-25">
-        {{question.content | linebreaksbr}}
-    </div>
-    <div class="row h-50">
-        {% if not is_disp_answer %}
-            <form action="" method="post">
-                {% csrf_token %}
-                {% for field in form %}
-                    {{ field|add_class:'answer_field' }}
-                {% endfor %}
-                {% if is_respondent %}
-                    <input id="answer" class="btn btn-primary" type="submit" name="respond" value="回答する">
+    <div class="row mt-4">
+        <div class="col-md-12">
+            {% if question is None %}
+                全ての問題が終了しました！
+            {% else %}
+                {% if not is_disp_answer %}
+                    <img src="{{ question.question_img.url }}" width="1100px">
+                {% else %}
+                    <img src="{{ question.answer_img.url }}" width="1100px">
                 {% endif %}
-            </form>
-        {% else%}
-            答えは、{{ answer }}です。
-        {% endif %}
+            {% endif %}
+        </div>
     </div>
-    <script>
-        $('#answer').click(function(){
-            if (!confim('この回答でよろしいですか？')){
-                return false;
-            } else {
-                return true;
-            }
-        });
-    </script>
-    <style>
-        .answer_field {
-            list-style-type: none;
-        }
-    </style>
 {% endblock %}
