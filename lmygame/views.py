@@ -8,7 +8,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 
 from .forms import LoginForm
-from .models import Question, Employee
+from .models import Question, Employee, NamePlateList
 
 class Login(LoginView):
     """
@@ -95,11 +95,6 @@ def selection(request):
             #############################
             # ポイント付与ボタン押下時の処理 #
             #############################
-            #【参加者への付与タイミング】　
-            #・ 手札の社員が回答者に選ばれる → +1pt
-            #・ 手札の社員が正解する → +2pt
-            #【回答者への付与タイミング】
-            #・  問題に正解する → +3pt
 
             pass
     return render(request, "lmygame/selection.html", context)
@@ -109,7 +104,49 @@ def name_plate_list(request):
     """
     手札一覧画面に対応するview
     """
-    return render(request, "lmygame/name_plate_list.html")
+    # ログインユーザ取得（社員番号）
+    login_username = request.user
+    login_user = Employee.objects.get(username=login_username)
+    # 手札確定済フラグ
+    is_fixed_list = Employee.objects.get(username=login_username).is_fixed_list
+    print(is_fixed_list)
+
+    if request.method == 'GET':
+        # ログインユーザが手札確定済かチェック
+        if is_fixed_list:
+            # 手札確定済の場合
+            # DBから手札を取得
+            name_plate_objects = NamePlateList.objects.filter(belong_user=login_user).values('emp_number')
+            # 画面表示用のデータ作成
+            username_list = [name_plate['emp_number'] for name_plate in name_plate_objects]
+            name_plate_list = [Employee.objects.get(username=username) for username in username_list]
+
+        else:
+            # 手札確定済でない場合
+            name_plate_list = _get_name_plate(login_user)
+
+    elif request.method == 'POST':
+        if 'reselect' in request.POST:
+            # 手札を選び直すボタン押下時
+            name_plate_list = _get_name_plate(login_user)
+
+        elif 'fix' in request.POST:
+            # 手札を確定するボタン押下時
+            is_fixed_list = True
+            # ログインユーザの手札確定済フラグをONにする
+            Employee.objects.filter(username=login_username).update(is_fixed_list=is_fixed_list)
+            # DBから手札を取得
+            name_plate_objects = NamePlateList.objects.filter(belong_user=login_user).values('emp_number')
+            # 画面表示用のデータ作成
+            username_list = [name_plate['emp_number'] for name_plate in name_plate_objects]
+            name_plate_list = [Employee.objects.get(username=username) for username in username_list]
+
+    context = {
+        'name_plate_list': name_plate_list,
+        'is_fixed_list': is_fixed_list,
+    }
+    return render(request, "lmygame/name_plate_list.html", context)
+
 
 @login_required
 def question(request):
@@ -162,3 +199,45 @@ def result(request):
     最終結果表示画面に対応するview
     """
     return render(request, "lmygame/result.html")
+
+
+def _get_name_plate(login_user):
+    """
+    ユーザの手札を決定する
+    """
+    # DBの状態をリセット
+    NamePlateList.objects.filter(belong_user=login_user).delete()
+    # 社員の一覧を取得
+    all_employee = Employee.objects.all().values('username')
+    # 社員番号のリストを作成
+    all_employee_username_list = [employee['username'] for employee in all_employee]
+    # ランダムに20名選択
+    selected_employee = random.sample(all_employee_username_list, 20)
+    # DBに登録
+    name_plate_list_objects = []
+    for emp_number in selected_employee:
+        name_plate_list_objects.append(
+            NamePlateList(
+                belong_user=login_user,
+                emp_number=emp_number
+            )
+        )
+    NamePlateList.objects.bulk_create(name_plate_list_objects)
+    # 表示用データを作成
+    return [Employee.objects.get(username=username) for username in selected_employee]
+
+
+def _grant_point_to_participant():
+    """
+    参加者へのポイント付与
+    """
+    #【参加者への付与タイミング】　
+    #・ 手札の社員が回答者に選ばれる → +1pt
+    #・ 手札の社員が正解する → +2pt
+
+def _grant_point_to_respondent():
+    """
+    回答者へのポイント付与
+    """
+    #【回答者への付与タイミング】
+    #・  問題に正解する → +3pt

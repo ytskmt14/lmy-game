@@ -52,6 +52,11 @@ class Employee(AbstractUser):
         max_length=50,
         null=True,
     )
+    profile_img = models.ImageField(
+    _('顔写真'),
+    upload_to='profiles',
+    blank=True,
+    )
 
 class Question(models.Model):
     question_id = models.AutoField(primary_key=True)

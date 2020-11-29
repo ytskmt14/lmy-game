@@ -12,7 +12,28 @@
 {% endblock %}
 
 {% block content %}
-    {% with ''|center:5 as row_num %}
+<div class="row">
+    {% for name_plate in name_plate_list %}
+        <div class="col-sm-3">
+            <div class="card mb-3">
+                <div class="row no-gutters">
+                    <div class="col-md-7">
+                    <svg class="bd-placeholder-img" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" focusable="false" role="img" aria-label="Placeholder: Image"><title>Placeholder</title><rect width="100%" height="100%" fill="#868e96"/><text x="50%" y="50%" fill="#dee2e6" dy=".3em">Image</text></svg>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ name_plate.username }}</h5>
+                            <p class="card-text">部署</p>
+                            <p class="card-text">役職</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+    {% comment %} {% with ''|center:5 as row_num %}
         {% for _ in row_num %}
             <div class="row">
                 {% with ''|center:4 as card_list %}
@@ -37,13 +58,18 @@
                 {% endwith %}
             </div>
         {% endfor %}
-    {% endwith %}
-    <div class="row">
-        <div class="col-sm-2 offset-sm-3">
-            <button class="btn btn-primary">手札を選び直す</button>
-        </div>
-        <div class="col-sm-2 offset-sm-2">
-            <button class="btn btn-primary">手札を確定する</button>
-        </div>
-    </div>
+    {% endwith %} {% endcomment %}
+    {% if not is_fixed_list %}
+        <form action="" method="post">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-sm-2 offset-sm-3">
+                    <input class="btn btn-primary" type="submit" name="reselect" value="手札を選び直す">
+                </div>
+                <div class="col-sm-2 offset-sm-2">
+                    <input class="btn btn-primary" type="submit" name="fix" value="手札を確定する">
+                </div>
+            </div>
+        </form>
+    {% endif %}
 {% endblock %}
