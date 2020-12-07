@@ -41,6 +41,7 @@
                             <p class="card-text">部署：{{ respondence.department }}</p>
                             <p class="card-text">役職：{{ respondence.position }}</p>
                             <div class="form-check">
+                                <input type="hidden" name="respondence" value="{{ respondence.username }}">
                                 <input class="form-check-input" type="checkbox" id="correctCheck{{ forloop.counter }}" name="correct" value="{{ respondence.username }}">
                                 <label for="correctCheck{{ forloop.counter }}">正解</label>
                             </div>

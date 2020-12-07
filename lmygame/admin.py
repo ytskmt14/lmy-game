@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import Employee, Question
+from .models import Employee, Question, NamePlateList
 
 # Register your models here.
 admin.site.register(Employee, UserAdmin)
@@ -21,3 +21,5 @@ class QuestionAdmin(admin.ModelAdmin):
     ]
 
 admin.site.register(Question, QuestionAdmin)
+
+admin.site.register(NamePlateList)

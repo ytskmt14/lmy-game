@@ -69,8 +69,7 @@ def selection(request):
             participants = [participant['username'] for participant in participants]
             respondence_list = []
             if len(participants) >= 3:
-                respondence_list = random.sample(participants, 2)
-                # respondence_list = random.sample(participants, 3)
+                respondence_list = random.sample(participants, 3)
             else:
                 respondence_list = random.sample(participants, len(participants))
             # 回答者フラグの立っている社員のフラグをおろす
@@ -95,8 +94,27 @@ def selection(request):
             #############################
             # ポイント付与ボタン押下時の処理 #
             #############################
+            # 回答者を取得
+            respondent_users = request.POST.getlist('respondence')
+            # 正解者を取得
+            correct_users = request.POST.getlist('correct')
+            # ログインユーザ
+            login_user = request.user
 
-            pass
+            print(respondent_users)
+            print(correct_users)
+
+            # 参加者へのポイント付与
+            _grant_point_to_participant(respondent_users, correct_users)
+            # 回答者へのポイント付与
+            _grant_point_to_respondent(correct_users)
+
+            respondences = Employee.objects.filter(is_respondent=True).values('username')
+            respondences_info = [Employee.objects.get(username=respondence['username']) for respondence in respondences]
+            context = {
+                'is_admin': is_admin,
+                'respondences_info': respondences_info,
+            }
     return render(request, "lmygame/selection.html", context)
 
 @login_required
@@ -109,7 +127,6 @@ def name_plate_list(request):
     login_user = Employee.objects.get(username=login_username)
     # 手札確定済フラグ
     is_fixed_list = Employee.objects.get(username=login_username).is_fixed_list
-    print(is_fixed_list)
 
     if request.method == 'GET':
         # ログインユーザが手札確定済かチェック
@@ -227,17 +244,32 @@ def _get_name_plate(login_user):
     return [Employee.objects.get(username=username) for username in selected_employee]
 
 
-def _grant_point_to_participant():
+def _grant_point_to_participant(respondent_users, correct_users):
     """
     参加者へのポイント付与
     """
-    #【参加者への付与タイミング】　
-    #・ 手札の社員が回答者に選ばれる → +1pt
-    #・ 手札の社員が正解する → +2pt
+    # 回答者を手札に持つユーザを取得
+    name_plate_list = NamePlateList.objects.filter(emp_number__in=respondent_users)
+    for name_plate in name_plate_list:
+        # ポイント加算するユーザを取得
+        winner = Employee.objects.get(username=name_plate.belong_user)
+        # 1pt付与
+        winner.point += 1
+        if name_plate.emp_number in correct_users:
+            # 正解していたらさらに2pt付与
+            winner.point += 2
+        winner.save()
 
-def _grant_point_to_respondent():
+def _grant_point_to_respondent(correct_users):
     """
     回答者へのポイント付与
     """
     #【回答者への付与タイミング】
-    #・  問題に正解する → +3pt
+    # 問題に正解する → +3pt
+    for correct_user in correct_users:
+        print(correct_user)
+        winner = Employee.objects.get(username=correct_user)
+        print(winner.point)
+        winner.point += 3
+        winner.save()
+        print(winner.point)
