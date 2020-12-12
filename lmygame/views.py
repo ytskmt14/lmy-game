@@ -76,7 +76,6 @@ def selection(request):
             past_respondences = Employee.objects.filter(is_respondent=True)
             for past_respondence in past_respondences:
                 past_respondence.is_respondent = False
-                past_respondence.was_respondent = True
                 past_respondence.save()
 
             # 選出された社員の回答者フラグを立てる
@@ -109,11 +108,16 @@ def selection(request):
             # 回答者へのポイント付与
             _grant_point_to_respondent(correct_users)
 
-            respondences = Employee.objects.filter(is_respondent=True).values('username')
-            respondences_info = [Employee.objects.get(username=respondence['username']) for respondence in respondences]
+            # 現在の回答者を過去の回答者とする
+            respondences = Employee.objects.filter(username__in=respondent_users)
+            for respondence in respondences:
+                respondence.is_respondent = False
+                respondence.was_respondent = True
+                respondence.save()
+
+            respondences_info = [respondence for respondence in respondences]
             context = {
                 'is_admin': is_admin,
-                'respondences_info': respondences_info,
             }
     return render(request, "lmygame/selection.html", context)
 
@@ -125,6 +129,7 @@ def name_plate_list(request):
     # ログインユーザ取得（社員番号）
     login_username = request.user
     login_user = Employee.objects.get(username=login_username)
+    point = login_user.point
     # 手札確定済フラグ
     is_fixed_list = Employee.objects.get(username=login_username).is_fixed_list
 
@@ -137,7 +142,6 @@ def name_plate_list(request):
             # 画面表示用のデータ作成
             username_list = [name_plate['emp_number'] for name_plate in name_plate_objects]
             name_plate_list = [Employee.objects.get(username=username) for username in username_list]
-
         else:
             # 手札確定済でない場合
             name_plate_list = _get_name_plate(login_user)
@@ -161,6 +165,7 @@ def name_plate_list(request):
     context = {
         'name_plate_list': name_plate_list,
         'is_fixed_list': is_fixed_list,
+        'point': point,
     }
     return render(request, "lmygame/name_plate_list.html", context)
 
