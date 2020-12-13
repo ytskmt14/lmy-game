@@ -12,5 +12,9 @@
 {% endblock %}
 
 {% block content %}
-
+    {% for user in rank_users %}
+        <div>
+            第{{ forloop.counter }}位　{{ user.username }}さん　{{ user.point }}pt
+        </div>
+    {% endfor %}
 {% endblock %}

@@ -220,7 +220,13 @@ def result(request):
     """
     最終結果表示画面に対応するview
     """
-    return render(request, "lmygame/result.html")
+    if request.method == 'GET':
+        # 所持ポイントの高い順にユーザを取得する
+        rank_users = Employee.objects.all().order_by('-point')
+
+    elif request.method == 'POST':
+        pass
+    return render(request, "lmygame/result.html", {'rank_users': rank_users})
 
 
 def _get_name_plate(login_user):

@@ -17,17 +17,17 @@
             {% if is_admin %}
                 <!-- 回答者を選ぶボタン -->
                 <div class="col-md-2">
-                    <input id="selection" class="btn btn-primary" type="submit" name="selection" value="回答者を選ぶ">
+                    <input id="selection" onclick="confirmSelection()" class="btn btn-primary" type="submit" name="selection" value="回答者を選ぶ">
                 </div>
 
                 <!-- ポイント付与ボタン -->
                 <div class="col-md-2">
-                    <input id="grantPoint" class="btn btn-primary" type="submit" name="grantPoint" value="ポイント付与">
+                    <input id="grantPoint" onclick="confirmGrantPoint()" class="btn btn-primary" type="submit" name="grantPoint" value="ポイント付与">
                 </div>
 
                 <!-- 問題を表示するボタン（リンク） -->
                 <div class="col-md-8">
-                    <a href="{% url 'lmygame:question' %}" id="disp-question" class="btn btn-primary">問題を表示する</a>
+                    <a href="{% url 'lmygame:question' %}" id="dispQuestion" class="btn btn-primary">問題を表示する</a>
                 </div>
             {% endif %}
         </div>
@@ -51,4 +51,5 @@
             {% endfor %}
         </div>
     </form>
+    <script type="text/javascript" src="{% static 'js/selection.js' %}"></script>
 {% endblock %}
