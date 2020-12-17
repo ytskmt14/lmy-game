@@ -1,4 +1,6 @@
 from django.contrib import admin
+from import_export import resources
+from import_export.admin import ImportExportModelAdmin
 from django.contrib.auth.admin import UserAdmin
 from .models import Employee, Question, NamePlateList
 from django.utils.translation import gettext, gettext_lazy as _
@@ -6,6 +8,7 @@ from django.utils.translation import gettext, gettext_lazy as _
 # Employee モデル（Users拡張）#
 ############################
 
+# action lists
 def enable_is_participant(modeladmin, request, queryset):
     """
     参加者フラグを立てる
@@ -43,7 +46,12 @@ def reset_init_status(modeladmin, request, queryset):
 
 reset_init_status.short_description = "初期状態に戻す"
 
-class CustomUserAdmin(UserAdmin):
+class EmployeeResource(resources.ModelResource):
+    class Meta:
+        model = Employee
+        fields = ('id', 'username', 'first_name', 'last_name', 'department', 'position')
+
+class CustomUserAdmin(ImportExportModelAdmin, UserAdmin):
 
     list_display = ('username', 'first_name', 'last_name', 'point', 'is_respondent', 'was_respondent', 'is_participant')
 
@@ -54,6 +62,8 @@ class CustomUserAdmin(UserAdmin):
     )
 
     actions = [enable_is_participant, unable_is_participant, unable_is_respondent, unable_was_respondent, reset_init_status]
+
+    resource_class = EmployeeResource
 
 admin.site.register(Employee, CustomUserAdmin)
 ##################

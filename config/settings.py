@@ -23,12 +23,12 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['127.0.0.1', '.herokuapp.com']
-
 try:
     from .local_settings import *
 except ImportError:
     pass
+
+ALLOWED_HOSTS = ['127.0.0.1', '.herokuapp.com']
 
 # Application definition
 
@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'lmygame',
     'bootstrap4',
     'widget_tweaks',
+    'import_export',
 ]
 
 MIDDLEWARE = [
