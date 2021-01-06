@@ -12,9 +12,34 @@
 {% endblock %}
 
 {% block content %}
-    {% for user in rank_users %}
-        <div>
-            第{{ forloop.counter }}位　{{ user.username }}さん　{{ user.point }}pt
-        </div>
-    {% endfor %}
+    <div class="mt-5">
+        {% for user in rank_users %}
+            <div class="row">
+                {% with index=forloop.counter0 %}
+                    <div class="col-sm-3">
+                        <p>第{{ index|add:"1" }}位　{{ user.first_name }}　{{ user.last_name }}さん</p>
+                    </div>
+                    <div class="col-sm-7">
+                        <div class="progress">
+                            {% for bar_length in bar_length_list %}
+                                {% if forloop.counter0 == index %}
+                                    <div
+                                        class="progress-bar"
+                                        role="progressbar"
+                                        style="width: {{ bar_length}}%"
+                                        aria-valuenow="{{user.point}}"
+                                        aria-valuemin= "0"
+                                        aria-valuemax="{{ max_point }}">
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="col-sm-1">
+                        <p>{{ user.point }}pt</p>
+                    </div>
+                {% endwith %}
+            </div>
+        {% endfor %}
+    </div>
 {% endblock %}

@@ -1,5 +1,9 @@
 let confirmSelection = function () {
-    return window.confirm('回答者を選出します。よろしいですか？');
+    if (window.confirm('回答者を選出します。よろしいですか？')) {
+        return true;
+    } else {
+        return false;
+    }
 }
 
 let confirmGrantPoint = function () {

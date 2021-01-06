@@ -58,7 +58,11 @@ class CustomUserAdmin(ImportExportModelAdmin, UserAdmin):
     fieldsets = (
         (None, {'fields': ('username', 'is_admin', 'password')}),
         (_('Personal info'), {'fields': ('profile_img', 'first_name', 'last_name', 'department', 'position')}),
-        (_('ゲーム情報'), {'fields': ('point', 'is_respondent', 'was_respondent', 'is_participant', )})
+        (_('ゲーム情報'), {'fields': ('point', 'is_respondent', 'was_respondent', 'is_participant',)}),
+        (_('Permissions'), {
+            'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions'),
+        }),
+
     )
 
     actions = [enable_is_participant, unable_is_participant, unable_is_respondent, unable_was_respondent, reset_init_status]

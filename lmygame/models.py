@@ -45,11 +45,13 @@ class Employee(AbstractUser):
     department = models.CharField(
         _('部署'),
         max_length=50,
+        blank=True,
         null=True,
     )
     position = models.CharField(
         _('役職'),
         max_length=50,
+        blank=True,
         null=True,
     )
     profile_img = models.ImageField(

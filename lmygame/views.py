@@ -1,4 +1,5 @@
 import random
+import math
 
 from django.contrib.auth import logout, login as auth_login
 from django.contrib.auth.decorators import login_required
@@ -221,12 +222,20 @@ def result(request):
     最終結果表示画面に対応するview
     """
     if request.method == 'GET':
-        # 所持ポイントの高い順にユーザを取得する
-        rank_users = Employee.objects.all().order_by('-point')
+        # 所持ポイントの高い20人分のデータを取得
+        rank_users = Employee.objects.all().order_by('-point')[0:20]
+        # 最高ポイントを取得
+        max_point = rank_users[0].point
+        # プログレスバーに表示する長さを算出
+        bar_length_list = [math.floor(user.point / max_point * 100) for user in rank_users]
 
-    elif request.method == 'POST':
-        pass
-    return render(request, "lmygame/result.html", {'rank_users': rank_users})
+        context = {
+            'rank_users': rank_users,
+            'max_point': max_point,
+            'bar_length_list': bar_length_list,
+        }
+
+    return render(request, "lmygame/result.html", context)
 
 
 def _get_name_plate(login_user):
