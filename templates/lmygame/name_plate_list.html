@@ -8,11 +8,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 {% endblock %}
 
+{% block extraCss %}
+{% endblock %}
+
 {% block title %}
+    手札一覧 | LMYGAME
 {% endblock %}
 
 {% block content %}
-<div class="row">
+<div class="row mt-4">
     {% for name_plate in name_plate_list %}
         <div class="col-sm-3">
             <div class="card mb-3">
@@ -22,9 +26,15 @@
                     </div>
                     <div class="col-md-8">
                         <div class="card-body">
-                            <h6 class="card-title">{{ name_plate.first_name }}　{{ name_plate.last_name }}</h5>
-                            <p class="card-text">部署</p>
-                            <p class="card-text">役職</p>
+                            <p class="card-title" style="font-size: 1.0em; font-family: 'Osaka';">
+                                {{ name_plate.first_name }}　{{ name_plate.last_name }}
+                            </p>
+                            <p class="card-text" style="font-family: 'YuGothic'">
+                                {{ name_plate.department }}
+                            </p>
+                            <p class="card-text" style="font-family: 'YuGothic'">
+                                {{ name_plate.position }}　
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -46,6 +56,6 @@
         </div>
     </form>
 {% else %}
-    現在のpt : {{ point }}
+    現在のポイント : {{ point }}pt
 {% endif %}
 {% endblock %}

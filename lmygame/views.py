@@ -101,9 +101,6 @@ def selection(request):
             # ログインユーザ
             login_user = request.user
 
-            print(respondent_users)
-            print(correct_users)
-
             # 参加者へのポイント付与
             _grant_point_to_participant(respondent_users, correct_users)
             # 回答者へのポイント付与
@@ -226,8 +223,11 @@ def result(request):
         rank_users = Employee.objects.all().order_by('-point')[0:20]
         # 最高ポイントを取得
         max_point = rank_users[0].point
-        # プログレスバーに表示する長さを算出
-        bar_length_list = [math.floor(user.point / max_point * 100) for user in rank_users]
+        if max_point == 0:
+            bar_length_list = [0] * 20
+        else:
+            # プログレスバーに表示する長さを算出
+            bar_length_list = [math.floor(user.point / max_point * 100) for user in rank_users]
 
         context = {
             'rank_users': rank_users,
