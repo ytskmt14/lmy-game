@@ -1,5 +1,6 @@
 import random
 import math
+from typing import List
 
 from django.contrib.auth import logout, login as auth_login
 from django.contrib.auth.decorators import login_required
@@ -238,14 +239,14 @@ def result(request):
     return render(request, "lmygame/result.html", context)
 
 
-def _get_name_plate(login_user):
+def _get_name_plate(login_user: Employee):
     """
     ユーザの手札を決定する
     """
     # DBの状態をリセット
     NamePlateList.objects.filter(belong_user=login_user).delete()
     # 社員の一覧を取得
-    all_employee = Employee.objects.all().values('username')
+    all_employee = Employee.objects.exclude(username=login_user.username).values('username')
     # 社員番号のリストを作成
     all_employee_username_list = [employee['username'] for employee in all_employee]
     # ランダムに20名選択
@@ -264,7 +265,7 @@ def _get_name_plate(login_user):
     return [Employee.objects.get(username=username) for username in selected_employee]
 
 
-def _grant_point_to_participant(respondent_users, correct_users):
+def _grant_point_to_participant(respondent_users: List[str], correct_users: List[str]):
     """
     参加者へのポイント付与
     """
@@ -280,16 +281,13 @@ def _grant_point_to_participant(respondent_users, correct_users):
             winner.point += 2
         winner.save()
 
-def _grant_point_to_respondent(correct_users):
+def _grant_point_to_respondent(correct_users: List[str]):
     """
     回答者へのポイント付与
     """
     #【回答者への付与タイミング】
     # 問題に正解する → +3pt
     for correct_user in correct_users:
-        print(correct_user)
         winner = Employee.objects.get(username=correct_user)
-        print(winner.point)
         winner.point += 3
         winner.save()
-        print(winner.point)
